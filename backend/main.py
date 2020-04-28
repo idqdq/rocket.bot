@@ -1,44 +1,44 @@
+import uvicorn
 from fastapi import FastAPI
+from pydantic import BaseModel
+
 from batfish import LibBatfish
+
+
+NETWORK_NAME = "bf1"
+SNAPSHOT_NAME = "snapshot-01"
+SNAPSHOT_DIR = './networks/bf1'
 
 app = FastAPI()
 
-data = [
-    {"name": "table1",
-    "num": 5,
-    "size": "big",
-    "color": "green",
-    "legs": 6},
-    {"name": "table2",
-     "num": 10,
-     "size": "small",
-     "color": "red",
-     "legs": 7},
-     {"name": "table3",
-     "num": 12,
-     "size": "little",
-     "color": "blue",
-     "legs": 9}
+class aclData(BaseModel):
+    srcIps: str
+    dstIps: str
+    dstPorts: str = None
+    ipProtocols: str = "TCP,UDP"
 
-]
+@app.post("/api/check_acl")
+def check_acl(data: aclData):
+    try:
+        LibBatfish.init_existed_snapshot(NETWORK_NAME, SNAPSHOT_NAME)
+    except:
+        return ":x: **batfish:** can't init snapshot"
+
+    try:
+        return LibBatfish.testACL(data.dict())
+    except:
+        return ":x: **batfish:** can't check acl. perhaps wrong request"
+    
 
 @app.get("/")
 async def root():
-    return {"message": "Hello World"}
+    return {"message": "batfish backend"}
 
 @app.get("/about")
 async def about():
     return {"message": "v.0.0.01b"}
 
-@app.get("/api")
-async def getall():
-    return data
 
-@app.get("/api/{id}")
-async def getone(id: int):
-    if id >= len(data):
-        return None
-    else: 
-        return data[id]
-
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8000)
 
