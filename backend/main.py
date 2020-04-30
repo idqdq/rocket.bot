@@ -7,7 +7,7 @@ from batfish import LibBatfish
 
 NETWORK_NAME = "bf1"
 SNAPSHOT_NAME = "snapshot-01"
-SNAPSHOT_DIR = './networks/bf1'
+SNAPSHOT_DIR = './bf_snapshots/networks/bf1'
 
 app = FastAPI()
 
@@ -29,6 +29,13 @@ def check_acl(data: aclData):
     except:
         return ":x: **batfish:** can't check acl. perhaps wrong request"
     
+@app.get("/api/initbf")
+def init_bf_snapshot():
+    try:
+        LibBatfish.init_new_snapshot(NETWORK_NAME, SNAPSHOT_NAME, SNAPSHOT_DIR)
+        return ":white_check_mark: snapshot has been initialized successfully"
+    except:
+        return ":x: **batfish** can't init snapshot"
 
 @app.get("/")
 async def root():

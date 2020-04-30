@@ -52,6 +52,11 @@ function func1(args) {
     return args.join("-");
 }
 
+
+// ************** batfish related commands ****************//
+const fetch = require('node-fetch');
+const BATFISH_API_URL = "http://127.0.0.1:8000/api/";
+
 // Use: @netbot acl from=any to=10.1.2.0/24 [port=3389] [proto=tcp] 
 // rule is based on a batfishe's HeaderConstraints class params
 // https://batfish.readthedocs.io/en/latest/datamodel.html#pybatfish.datamodel.flow.HeaderConstraints
@@ -60,26 +65,76 @@ function func1(args) {
 // dstPorts – Destination ports as list of ranges, (e.g., "22,53-99")
 // ipProtocols – List of well-known IP protocols (e.g., TCP, UDP, ICMP)
 
-function check_acl(args) {
-    const jkeys = ["srcIps", "dstIps", "dstPorts", "ipProtocols"]
+async function check_acl(args) {
+    const IpAddrPattern = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)($|\/(3[0-2]|[1-2][0-9]|[0-9])$)/;
+    const jkeys = ["srcIps", "dstIps", "dstPorts", "ipProtocols"];
+    const IpProtos = ["tcp","udp"];
     const jObj = {};
 
-    if (2 > args.length || args.length > 4) {
-        return ":robot: Incorrect argument numbers!\nUse: @BOTNAME acl from=any to=10.1.2.0/24 [port=3389] [proto=tcp]";
+    if (args[0] && args[0].toUpperCase() == "HELP") {
+        return `:question: **Check if a packet can pass ACL filters**
+        ***help*** - prints this;
+        ***init*** - reinit BatFish snapshot (needed after n7k configs were changed);
+        ***acl*** - check if a packet can pass through
+        **acl** command format: *src_addr dst_addr [ dst_port | dst_port (tcp|udp)]*
+        *example*: **BOTNAME acl 10.2.2.0/24 10.1.102.102 3389 tcp**
+        `
+    } 
+    else if (args[0] && args[0].toUpperCase() == "INIT") {
+        try {
+            const response = await fetch(BATFISH_API_URL + 'initbf');
+            const json = await response.json();
+            return json;
+        }
+        catch (err) {
+            return err;
+        }
     }
     
-    args.forEach((el, index) => {
-        if (el.includes("=")) {
-            jObj[jkeys[index]] = el.split("=")[1];
-        }
-    });
-
-    if (args.length != Object.keys(jObj).length) {
-        return ":robot: Incorrect Format!\nUse: @BOTNAME acl from=any to=10.1.2.0/24 [port=3389] [proto=tcp]";
+    if (2 > args.length || args.length > 4) {
+        return ":robot: Incorrect argument numbers!\nUse: @BOTNAME acl 10.2.3.4 10.1.2.0/24 [3389] | [3389 tcp]";
     }
 
-    return JSON.stringify(jObj);
+    for (let index=0; index < args.length; index++) { 
+        let el = args[index];
+        if (index == 0 || index == 1){
+            if (el == 'any') { 
+                el = '0.0.0.0'; 
+            }
+            if (!IpAddrPattern.test(el)){
+                return `:robot: Incorrect IP address ${el}`;
+            }
+        }
+        if (index == 2){
+            if (0 > el || el > 65535)
+                return `:robot: Incorrect port number ${el}`;
+        }
+
+        if (index == 3){
+            if (IpProtos.indexOf(el)==-1)
+                return `:robot: Incorrect ip protocol ${el}`;
+        }
+        
+        jObj[jkeys[index]] = el; 
+    };
+    //console.log(jObj);
+    //return JSON.stringify(jObj);
+
+    try {
+        const response = await fetch(BATFISH_API_URL + "check_acl", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(jObj)
+        });
+        const json = await response.json();
+        return json;
+    }
+    catch (err) {
+        return err;
+    }
 }
+// ******************** end batfish section *******************//
+
 
 function meme() {
     return {

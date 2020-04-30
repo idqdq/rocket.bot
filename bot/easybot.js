@@ -1,5 +1,5 @@
 const { driver } = require('@rocket.chat/sdk');
-const respmap = require('./reply');
+//const respmap = require('./reply');
 const rmap = require('./reply');
 
 // customize the following with your server and BOT account information
@@ -53,7 +53,7 @@ const processMessages = async (err, message, messageOptions) => {
             if (cli[0] in rmap) { // commands with args
                 const elem = rmap[cli[0]];
                 if (typeof elem === 'function')
-                    response = elem(cli.slice(1));
+                    response = await elem(cli.slice(1));
                 else 
                     response = elem;
             } else {
@@ -61,7 +61,7 @@ const processMessages = async (err, message, messageOptions) => {
                     'Для списка команд напишите: @' + BOTNAME + ' ***help***';
             }
         }
-
+        console.log(`response = ${response}`);
         if (response) {
             const sentmsg = await driver.sendToRoom(response, roomname);
         }
