@@ -85,3 +85,39 @@ Actually you don't have to init snapshot manually every time the network configs
 There is the special command to do that from within the application. 
 **@botname acl help** - command will help you to reveal it
 
+
+## Docker
+
+Now I'll try to dockerise the service to be more convinient to use
+
+There will be three docker containers:  
+  1. batfish
+  2. backend
+  3. bot
+
+### 1. batfish container
+Batfish is being delivered as a docker container from the very beginig.  
+The only change we need is to add ***-d*** parameter to the run command:
+> docker run --name batfish -v batfish-data:/data -p 8888:8888 -p 9997:9997 -p 9996:9996 -d batfish/allinone
+
+### 2. backend container
+
+DockerFile is built based on a [FastAPI tutorial: Deployment#Docker](https://fastapi.tiangolo.com/deployment/#docker)
+
+To make a a container we have to run the following command:
+> sudo docker build -t netbot.backend -f ./backend.docker .
+
+And then run the container:
+> sudo docker run -d -p 8000:80 --name netbot -v ~/configs:/app/bf_snapshots/networks/bf1/configs --link batfish -e BF_HOSTNAME=batfish netbot.backend
+
+Take a look at options -v, -e and --link
+
+For a docker version the network configs folder has been brought out ouside of the container
+To bring configs back to the container option ***-v*** (or --volume) is being used
+
+***-e*** and ***--link*** options point out to the batfish container  
+both parameters must contain tbe same value*
+
+### 3. bot container
+
+to be implemented

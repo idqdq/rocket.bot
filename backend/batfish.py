@@ -54,9 +54,16 @@ class LibBatfish(object):
         src = ".".join(src.split(".")[:3])
         dst = ".".join(dst.split(".")[:3])
 
-        if (x := LibBatfish.net2acl.get(src)): 
-            if (y := x.get("in")): filters.append(y)
-        if (x := LibBatfish.net2acl.get(dst)): 
-            if (y := x.get("out")): filters.append(y)
+        x = LibBatfish.net2acl.get(src)
+        if (x):
+            y = x.get("in")
+            if (y): 
+                filters.append(y)
+
+        x = LibBatfish.net2acl.get(dst)
+        if (x): 
+            y = x.get("out")
+            if (y): 
+                filters.append(y)
 
         return filters
