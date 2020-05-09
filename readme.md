@@ -30,9 +30,7 @@ Bot is a nodejs application. It uses rocket.chat SDK and a node-fetch module. To
 
 ```
 cd bot
-npm init -y
-npm install @rocket.chat/sdk
-npm install node-fetch --save
+npm install
 ```
 next open up *netbot.js* file in any editor and change chatbots url, botname and credentials  
 or you can init the corresponding environment vaariables. The more detailed description of ENV can be found below in the docker section.
