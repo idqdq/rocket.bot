@@ -34,12 +34,14 @@ npm init -y
 npm install @rocket.chat/sdk
 npm install node-fetch --save
 ```
-next open up *easybot.js* file in editor and change chatbots url and credentials
+next open up *netbot.js* file in any editor and change chatbots url, botname and credentials  
+or you can init the corresponding environment vaariables. The more detailed description of ENV can be found below in the docker section.
 
 now you can run bot just typing:
 ```
-node easybot.js
+node netbot.js
 ```
+
 
 ### 2. Deploing Backend
 
@@ -95,29 +97,65 @@ There will be three docker containers:
   2. backend
   3. bot
 
+All three containers shouldn't expose their network ports because they are sharing the same inner network.
+
 ### 1. batfish container
 Batfish is being delivered as a docker container from the very beginig.  
-The only change we need is to add ***-d*** parameter to the run command:
-> docker run --name batfish -v batfish-data:/data -p 8888:8888 -p 9997:9997 -p 9996:9996 -d batfish/allinone
+But the running string has to be modified a little.  
+First lets add a ***-d*** parameter so the container will be starting in a detached state.  
+And second as all three containers share the inner network it's not needed to expose any network ports.
+> docker run -d --name batfish -v batfish-data:/data batfish/allinone
 
 ### 2. backend container
 
-DockerFile is built based on a [FastAPI tutorial: Deployment#Docker](https://fastapi.tiangolo.com/deployment/#docker)
+For the backend there is a docker file ***backend.dockerfile*** in the root folder. It was made based on a [FastAPI tutorial: Deployment#Docker](https://fastapi.tiangolo.com/deployment/#docker)
 
-To make a a container we have to run the following command:
+To build a container run the following command: 
 > sudo docker build -t netbot.backend -f ./backend.docker .
 
-And then run the container:
-> sudo docker run -d -p 8000:80 --name netbot -v ~/configs:/app/bf_snapshots/networks/bf1/configs --link batfish -e BF_HOSTNAME=batfish netbot.backend
+After the docker has been built successfully we can run the container:
+> sudo docker run -d --name backend -v ~/configs:/app/bf_snapshots/networks/bf1/configs --link batfish -e BF_HOSTNAME=batfish netbot.backend
 
-Take a look at options -v, -e and --link
+Take a look closely at these options -v, -e and --link
 
-For a docker version the network configs folder has been brought out ouside of the container
-To bring configs back to the container option ***-v*** (or --volume) is being used
+For a dockerized version the network configs folder has been brought out ouside of the container. Thus we have separated data (configs) from the code (container) and we can put new configs at any time after the container has been built and ran.
+To map the configs folder with the container the option ***-v*** (or --volume) is being used
 
-***-e*** and ***--link*** options point out to the batfish container  
-both parameters must contain tbe same value*
+***-e*** and ***--link*** options point out to the **batfish** container.  
+both parameters must contain tbe same value
 
 ### 3. bot container
 
-to be implemented
+The docker file named ***bot.dockerfile*** is in the root folder as usual.  
+To build a container run the following command:
+> docker build -t netbot.bot -f bot.dockerfile .
+
+It's not very usefull to edit code and rebuilt a docker image every time you want to cange some connection variables. That is why the mandatory environment variables comes to a dockerized version. There are a number of ENV variables 
+
+ * *ROCKET_HOST* - the url the rocket.chat is running on
+ * *ROCKET_USER* - rocket.chat bot user 
+ * *ROCKET_PASS* - rocket.chat bot password
+ * *ROCKET_BOTNAME* - rocket.chat bot name by wich it is called to
+ * *BACKEND_API_URL* - the url the backend api is accessible e.g. *http://backend/api/*
+
+ > docker run --name bot -d --link backend -e BACKEND_API_URL=http://backend/api/ -e ROCKET_HOST=https://rocket.acme -e ROCKET_USER=bot -e ROCKET_PASS=botpass -e ROCKET_BOTNAME=easybot netbot.bot
+
+---- 
+Now all three containers should be up and running.
+```bash
+a@oldbox:~/work$ docker ps
+CONTAINER ID        IMAGE               COMMAND             CREATED              STATUS              PORTS                     NAMES
+762ffc991947        netbot.bot          "node netbot.js"    12 seconds ago       Up 10 seconds                                 bot
+c723b35bd225        netbot.backend      "/start.sh"         About a minute ago   Up 59 seconds       80/tcp                    backend
+340717cde310        batfish/allinone    "./wrapper.sh"      2 minutes ago        Up 2 minutes        8888/tcp, 9996-9997/tcp   batfish
+
+```
+
+The message *easybot is listenig...* should appear in the given rocket.chat channel.  
+But we have to make a final step - to initialize the batfish snapshot. It can be done by issuing the command:
+> @easybot acl init
+
+The operation takes a couple of seconds (depends of underlying hardware perfomance) and if all goes well it should return a message of success. Now the service can be fully used.
+
+![img4](docs/rocket.bot.docker.success.png)
+
