@@ -79,8 +79,9 @@ bf_set_network('bf1')
 bf_init_snapshot('./bf_snapshots/networks', 'snapshot-01', overwrite=True)
 ```
 batfish should find the configs and then a snapshot should be created. If all went well you can exit the interactive python shell and finally run the application by typing the command:
-> uvicorm main:app 
-
+```
+uvicorm main:app 
+```
 Actually you don't have to init snapshot manually every time the network configs has been changed.
 There is the special command to do that from within the application. 
 **@botname acl help** - command will help you to reveal it
@@ -102,18 +103,21 @@ Batfish is being delivered as a docker container from the very beginig.
 But the running string has to be modified a little.  
 First lets add a ***-d*** parameter so the container will be starting in a detached state.  
 And second as all three containers share the inner network it's not needed to expose any network ports.
-> docker run -d --name batfish -v batfish-data:/data batfish/allinone
-
+```
+docker run -d --name batfish -v batfish-data:/data batfish/allinone
+```
 ### 2. backend container
 
 For the backend there is a docker file ***backend.dockerfile*** in the root folder. It was made based on a [FastAPI tutorial: Deployment#Docker](https://fastapi.tiangolo.com/deployment/#docker)
 
 To build a container run the following command: 
-> sudo docker build -t netbot.backend -f ./backend.docker .
-
+```
+sudo docker build -t netbot.backend -f ./backend.docker .
+```
 After the docker has been built successfully we can run the container:
-> sudo docker run -d --name backend -v ~/configs:/app/bf_snapshots/networks/bf1/configs --link batfish -e BF_HOSTNAME=batfish netbot.backend
-
+```
+sudo docker run -d --name backend -v ~/configs:/app/bf_snapshots/networks/bf1/configs --link batfish -e BF_HOSTNAME=batfish netbot.backend
+```
 Take a look closely at these options -v, -e and --link
 
 For a dockerized version the network configs folder has been brought out ouside of the container. Thus we have separated data (configs) from the code (container) and we can put new configs at any time after the container has been built and ran.
@@ -126,8 +130,9 @@ both parameters must contain tbe same value
 
 The docker file named ***bot.dockerfile*** is in the root folder as usual.  
 To build a container run the following command:
-> docker build -t netbot.bot -f bot.dockerfile .
-
+```
+docker build -t netbot.bot -f bot.dockerfile .
+```
 It's not very usefull to edit code and rebuilt a docker image every time you want to cange some connection variables. That is why the mandatory environment variables comes to a dockerized version. There are a number of ENV variables 
 
  * *ROCKET_HOST* - the url the rocket.chat is running on
@@ -136,8 +141,10 @@ It's not very usefull to edit code and rebuilt a docker image every time you wan
  * *ROCKET_BOTNAME* - rocket.chat bot name by wich it is called to
  * *BACKEND_API_URL* - the url the backend api is accessible e.g. *http://backend/api/*
 
- > docker run --name bot -d --link backend -e BACKEND_API_URL=http://backend/api/ -e ROCKET_HOST=https://rocket.acme -e ROCKET_USER=bot -e ROCKET_PASS=botpass -e ROCKET_BOTNAME=easybot netbot.bot
-
+The resulting *run* command would be something like that:
+```
+docker run --name bot -d --link backend -e BACKEND_API_URL=http://backend/api/ -e ROCKET_HOST=https://rocket.acme -e ROCKET_USER=bot -e ROCKET_PASS=botpass -e ROCKET_BOTNAME=easybot netbot.bot
+```
 ---- 
 Now all three containers should be up and running.
 ```bash
@@ -149,10 +156,11 @@ c723b35bd225        netbot.backend      "/start.sh"         About a minute ago  
 
 ```
 
-The message *easybot is listenig...* should appear in the given rocket.chat channel.  
-But we have to make a final step - to initialize the batfish snapshot. It can be done by issuing the command:
-> @easybot acl init
-
+And the message ( *easybot is listenig...* ) should appear in the given rocket.chat channel.  
+But there is one final step left - we have to initialize the batfish snapshot. It can be done by issuing the following command in a rocket.chat client:
+```
+@easybot acl init
+```
 The operation takes a couple of seconds (depends of underlying hardware perfomance) and if all goes well it should return a message of success. Now the service can be fully used.
 
 ![img4](docs/rocket.bot.docker.success.png)
