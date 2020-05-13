@@ -67,3 +67,11 @@ class LibBatfish(object):
                 filters.append(y)
 
         return filters
+
+    def getUnreachableACE(data):
+        # returns unreachable ACEs in the given ACL for a device
+        res = bfq.filterLineReachability(filters=data["acl"], nodes=data["device"]).answer().frame()
+        if not res.empty:
+            return res.head(data["lines"]).to_markdown()
+        else:
+            return f':white_check_mark: There is no unreachable ACE for ACL: {data["acl"]}'

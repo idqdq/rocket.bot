@@ -17,18 +17,40 @@ class aclData(BaseModel):
     dstPorts: str = None
     ipProtocols: str = "TCP,UDP"
 
-@app.post("/api/check_acl")
-def check_acl(data: aclData):
+class aceData(BaseModel):
+    acl: str
+    device: str
+    lines: int = 4 # default. returns 4 lines
+
+def InitBatfish():
     try:
         LibBatfish.init_existed_snapshot(NETWORK_NAME, SNAPSHOT_NAME)
+        return True
     except:
-        return ":x: **batfish:** can't init snapshot"
+        return False
 
-    try:
-        return LibBatfish.testACL(data.dict())
-    except:
-        return ":x: **batfish:** can't check acl. perhaps wrong request"
+@app.post("/api/check_acl")
+def check_acl(data: aclData):       
+    if InitBatfish():
+        try:
+            return LibBatfish.testACL(data.dict())
+        except:
+            return ":x: **batfish:** can't check acl. perhaps wrong request"
     
+    return ":x: **batfish:** can't init snapshot"
+
+# @easybot acl unreachable VL20_OUT n7k1 5 - prints 5 lines of unreachable ace's of the given acl
+@app.post("/api/check_unreachable_ace")  
+def check_unreachable_ace(data: aceData):    
+    if InitBatfish():
+        try:
+            return LibBatfish.getUnreachableACE(data.dict())
+        except:
+            return ":x: **batfish:** can't check acl. perhaps wrong request"
+    
+    return ":x: **batfish:** can't init snapshot"
+
+# @easybot init - init a batfish snapshot (needed if running first time or if config files were changed)
 @app.get("/api/initbf")
 def init_bf_snapshot():
     try:
