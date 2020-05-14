@@ -62,8 +62,9 @@ docker run --name batfish -v batfish-data:/data -p 8888:8888 -p 9997:9997 -p 999
 
 It's time to make sure batfish is working.   
 To do that you have to prepare network configuration files and place them under the directory
-> backend/bf_snapshots/networks/configs
-
+```
+backend/bf_snapshots/networks/configs
+```
 then run interactive python (ipython or bpython) and excute the following code:
 ```
 import pandas as pd
@@ -112,7 +113,7 @@ For the backend there is a docker file ***backend.dockerfile*** in the root fold
 
 To build a container run the following command: 
 ```
-sudo docker build -t netbot.backend -f ./backend.docker .
+sudo docker build -t netbot.backend -f ./backend.dockerfile .
 ```
 After the docker has been built successfully we can run the container:
 ```
