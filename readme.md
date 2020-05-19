@@ -144,7 +144,7 @@ It's not very usefull to edit code and rebuilt a docker image every time you wan
 
 The resulting *run* command would be something like that:
 ```
-docker run --name bot -d --link backend -e BACKEND_API_URL=http://backend/api/ -e ROCKET_HOST=https://rocket.acme -e ROCKET_USER=bot -e ROCKET_PASS=botpass -e ROCKET_BOTNAME=easybot netbot.bot
+docker run --name bot -d --link backend -e BACKEND_API_URL=http://backend/api/ -e ROCKET_HOST=https://rocket.acme -e ROCKET_USER=bot -e ROCKET_PASS=botpass -e ROCKET_BOTNAME=netbot netbot.bot
 ```
 ---- 
 Now all three containers should be up and running.
@@ -157,10 +157,10 @@ c723b35bd225        netbot.backend      "/start.sh"         About a minute ago  
 
 ```
 
-And the message ( *easybot is listenig...* ) should appear in the given rocket.chat channel.  
+And the message ( *netbot is listenig...* ) should appear in the given rocket.chat channel.  
 But there is one final step left - we have to initialize the batfish snapshot. It can be done by issuing the following command in a rocket.chat client:
 ```
-@easybot acl init
+@netbot acl init
 ```
 The operation takes a couple of seconds (depends of underlying hardware perfomance) and if all goes well it should return a message of success. Now the service can be fully used.
 

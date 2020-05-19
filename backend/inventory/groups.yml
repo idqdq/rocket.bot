@@ -1,0 +1,24 @@
+---
+groups:
+  nexus:
+    platform: nxos
+    username: admin
+    password: $ecret1
+  ios:
+    platform: ios
+    username: admin
+    password: $ecret1
+  huawei:
+    platform: huawei
+    username: admin
+    password: $ecret1
+
+  core:
+    role: core
+  access:
+    role: access
+
+  su:
+    site: su
+  shab:
+    site: shab
