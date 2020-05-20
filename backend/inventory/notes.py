@@ -1,29 +1,51 @@
 # notes
+import napalm
+
+def play_napalm(platform):
+    driver = napalm.get_network_driver(platform)
+    #with driver(host, user, pasw, optional_args={'transport': 'telnet'}) as device:
+    with driver(host, user, pasw) as device:
+        device.open()
+        cli_cmd = [cmd]
+        res = device.cli(cli_cmd)
+        return res
 
 host = 'catalyst19'
 user = 'admin'
-pasw = '$$$$$$'
+pasw = '$ecret1'
 
 vlan = 21
-mac = 'f4ce.46f3.523a'
+mac = '0001.6cd5.ad67'
 cmd = 'show mac address-table vlan {} | i {}'.format(vlan,mac)
+platform = 'ios'
 
-import napalm
-
-driver = napalm.get_network_driver("ios")
-
-with driver(host, user, pasw) as device:
-
-    device.open()
-
-    cli_cmd = [cmd]
-    res = device.cli(cli_cmd)
+print(platform + ": " + cmd)
+res = play_napalm(platform)
+print(res[cmd])
 
 # res
 #  {'show mac address-table vlan 21 | i f4ce.46f3.523a': '21    f4ce.46f3.523a    DYNAMIC     Po48'}
 
 # res[cmd[0]].split()[-1]
 # 'Po48'
+
+
+# huawei uses napalm-ce driver
+# it has to be installed manually by pip3 install napalm-ce
+
+host = 'shab-4a'
+user = 'nryzhkov'
+pasw = 'ixgrp208'
+vlan = 160
+mac = '0008-5d51-bd39'
+cmd = 'display mac-address {} vlan {}'.format(mac, vlan)
+platform = 'huawei_vrp'
+
+print(platform + ": " + cmd)
+res = play_napalm(platform)
+print(res[cmd])
+
+
 
 """
 1. gethostbyname => IP

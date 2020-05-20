@@ -28,7 +28,7 @@ def InitInventory():
         except yaml.YAMLError as e: 
             print(e)
 
-    # enrish host data with group data
+    # enrich host data with group data
     for host in hosts:        
         for group in host['groups']: 
             if groups['groups'].get(group): 
