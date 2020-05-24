@@ -3,6 +3,7 @@ bot/package-lock.json
 
 .vscode/
 *.code-workspace
+**/passwds
 
 # Distribution / packaging
 .Python

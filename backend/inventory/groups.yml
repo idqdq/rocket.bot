@@ -9,10 +9,10 @@ groups:
     username: admin
     password: $ecret1
   huawei:
-    platform: huawei
-    username: admin
-    password: $ecret1
-
+    platform: huawei_vrp
+    username: ansible
+    password: Ra6oorai4dee
+    
   core:
     role: core
   access:
