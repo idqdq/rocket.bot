@@ -66,7 +66,7 @@ def init_bf_snapshot():
 
 
 # @netbot findport ( name | IP ) - shows the port the requested device is connected to 
-@app.get("/api/findport")
+@app.get("/api/findport/{address}")
 def findport(address: str):
     try:
         return FindPortByAddress(address)    
@@ -97,6 +97,6 @@ async def about():
     return {"message": "v.0.0.01b"}
 
 # comment it out in case of debugging
-#if __name__ == "__main__":
-#    uvicorn.run(app, host="0.0.0.0", port=8000)
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=9000)
 

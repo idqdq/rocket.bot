@@ -87,7 +87,7 @@ def FindPortByAddress(address):
 
     hosts = InitInventory()
 
-    res = get_mac_by_ip(hosts['core'], ip)
+    res = get_mac_by_ip(hosts[core], ip)
     if not res:
         return f":x: address {address} doesn't exist at the moment"
     
@@ -118,12 +118,12 @@ def FindPortRecursively(hosts, switch, mac, vlan=None, shift=""):
     vlan = res['vlan']
     shift += f"[{switch}]({port})"
 
-    newswitch = hosts[switch]['data']['children'].get(port)
-    if newswitch:
-        shift = shift + " => "
-        FindPortRecursively(hosts, newswitch, mac, vlan, shift)
-    else:
-        return shift
+    if hosts[switch]['data']['children']:
+        switch = hosts[switch]['data']['children'].get(port)
+        if switch:
+            shift = shift + " => "
+            return FindPortRecursively(hosts, switch, mac, vlan, shift)
+    return shift
 
 
 # [n7k1](Po12) => [catalyst19](Po4) => [catalyst101](fa0/1)

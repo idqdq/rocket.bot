@@ -47,6 +47,9 @@ Backend is a python application that uses the FastAPI framework and the pybatfis
 Note: pybatfish comes with pandas (Data analysisi library) version 0.26.x, but the application uses the function .to_markdown() that appeared since version 1.0.0. So packages must be installed in order: first install pybatfish, next - pandas.
 
 ```
+cd backend
+```
+```
 pip3 install pybatfish
 pip3 install --upgrade pandas
 ```
