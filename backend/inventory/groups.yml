@@ -12,6 +12,10 @@ groups:
     platform: huawei_vrp
     username: ansible
     password: Ra6oorai4dee
+  junos:
+    platform: junos
+    username: rancid
+    auth_private_key: ~/rocket/rancid_rsa
     
   core:
     role: core

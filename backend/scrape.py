@@ -32,7 +32,7 @@ def get_port_by_mac_huawei(host, mac, vlan=None):
 #nxos: sh mac address-table vlan 21 address 4c:cc:6a:55:f1:b5
 #res = [{'vlan': '21', 'mac': '4ccc.6a55.f1b5', 'type': 'dynamic', 'age': '~~~', 'secure': 'F', 'ntfy': 'F', 'ports': 'Po31'}]
 
-from scrapli.driver.core import IOSXEDriver, NXOSDriver
+from scrapli.driver.core import IOSXEDriver, NXOSDriver, JunosDriver
 
 def get_port_by_mac(host, mac, vlan=None):
 
@@ -104,21 +104,42 @@ def QuerySwitch(host, platform):
     
     return response.textfsm_parse_output()
 
+
+def get_port_by_mac_junos(host, mac, vlan=None):
+
+    if host['platform'] not in ('ios', 'nxos'):
+        return get_port_by_mac_huawei(host, mac, vlan)
     
-"""
-C3850#sh ip arp 10.1.161.78
-{'address': '10.1.161.78',
- 'age': '1',
- 'interface': 'Vlan160',
- 'mac': '94c6.9197.0151',
- 'protocol': 'Internet',
- 'type': 'ARPA'}
+    platform_map = {
+      'ios': {
+        'driver': IOSXEDriver,
+        'cmd': f'sh mac address-table address {mac} vlan {vlan}' if vlan else f'sh mac address-table address {mac}',
+        'port': 'destination_port'
+      },
+      'nxos': {
+        'driver': NXOSDriver,
+        'cmd': f'sh mac address-table vlan {vlan} address {mac}' if vlan else f'sh mac address-table address {mac}',
+        'port': 'ports'
+      }
+    }
 
-N7K2# sh ip arp 10.2.1.96 
- {'address': '10.2.1.96',
- 'age': '00:12:49',
- 'interface': 'Vlan21',
- 'mac': '4ccc.6a55.f1b5'}
+    platform = platform_map[host['platform']]
+    res = QuerySwitch(host, platform)
+    if res:
+        return { 'port': res[0][platform['port']], 'vlan': res[0]['vlan'] }
+    else:
+        return None
 
 """
+Juniper ssh by privkey
+In [16]: my_device = {
+    ...:     'host': 'ex2200-205',
+    ...:     'auth_username': 'rancid',
+    ...:     "auth_private_key": "~/rocket/rancid_rsa",
+    ...:     "auth_strict_key": False,
+    ...:     "ssh_config_file": True,
+    ...:     "timeout_transport": 20,
+    ...:     }
+"""
+
 
