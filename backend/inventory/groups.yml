@@ -2,16 +2,16 @@
 groups:
   nexus:
     platform: nxos
-    username: admin
-    password: $ecret1
+    username: админ
+    password: админ
   ios:
     platform: ios
-    username: admin
-    password: $ecret1
+    username: админ
+    password: админ
   huawei:
     platform: huawei_vrp
-    username: ansible
-    password: Ra6oorai4dee
+    username: админ
+    password: админ
   junos:
     platform: junos
     username: rancid

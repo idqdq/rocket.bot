@@ -110,6 +110,7 @@ def FindPortByMac(mac, siteID):
     
 def FindPortRecursively(hosts, switch, mac, vlan=None, shift=""):
     
+    mac = ConvertMac(mac, hosts[switch]['platform'])
     res = get_port_by_mac(hosts[switch], mac, vlan)  # res = {'port': port, 'vlan': vlan}
     if not res:
         return f":x: {shift}[{switch}]() no mac found"
