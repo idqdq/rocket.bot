@@ -97,6 +97,6 @@ async def about():
     return {"message": "v.0.0.01b"}
 
 # comment it out in case of debugging
-if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=9000)
+#if __name__ == "__main__":
+#    uvicorn.run(app, host="0.0.0.0", port=8000)
 

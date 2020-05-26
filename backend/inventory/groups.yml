@@ -2,16 +2,16 @@
 groups:
   nexus:
     platform: nxos
-    username: админ
-    password: админ
+    username: admin
+    password: 
   ios:
     platform: ios
-    username: админ
-    password: админ
+    username: admin
+    password: 
   huawei:
     platform: huawei_vrp
-    username: админ
-    password: админ
+    username: admin
+    password: 
   junos:
     platform: junos
     username: rancid

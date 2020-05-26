@@ -117,9 +117,9 @@ def FindPortRecursively(hosts, switch, mac, vlan=None, shift=""):
 
     port = res['port']
     vlan = res['vlan']
-    shift += f"[{switch}]({port})"
+    shift += f"[{switch}]()(**{port}**)"
 
-    if hosts[switch]['data']['children']:
+    if hosts[switch].get('data') and hosts[switch]['data'].get('children') and hosts[switch]['data']['children']:        
         switch = hosts[switch]['data']['children'].get(port)
         if switch:
             shift = shift + " => "

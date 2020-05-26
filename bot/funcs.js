@@ -8,7 +8,7 @@ const rmap = {
     "meme": meme,
     "zabbix": zabgraf,
     "acl": check_acl,
-    "findport":findport,
+    "port":findport,
     "md": check_md,
 };
 // help method that returns a set of keys
@@ -149,16 +149,15 @@ async function findport(args) {
 
     // @netbot findport help
     if (args[0] && args[0].toUpperCase() == "HELP") {
-        return `## findport help
-        ***findport help*** - prints this;  
-        ***findport hostname*** - finds the switch and the access port the device with name *hostname* is connected to
-        ***findport ip_address*** - finds the switch and the access port the device with ip address *ip_address* is connected to
-        ***findport mac mac_address site_id*** - finds the switch and the access port the device with mac address *mac_address* is connected to.
-        *findport phone 1234* - finds the switch and the access port the phone device with the hpne number 1234 is connected to (to be impemented)
-        *example*: 
-        > @botname findport 10.2.1.96
-        > @botname findport mac 00:11:22:33:44:55 0
-        `
+        return `## port help
+***port help*** - prints this;  
+***port hostname*** - finds the switch and the access port the device with name *hostname* is connected to  
+***port ip_address*** - finds the switch and the access port the device with ip address *ip_address* is connected to  
+***port mac mac_address site_id*** - finds the switch and the access port the device with mac address *mac_address* is connected to.  
+*port phone 1234* - finds the switch and the access port the phone device with the hpne number 1234 is connected to (to be impemented)  
+*example*:  
+> @botname port 10.2.1.96  
+> @botname port mac 00:11:22:33:44:55 0`
     }
     
     // @netbot findport mac MAC site_id | site_id is optional. default is 0
@@ -183,7 +182,7 @@ async function findport(args) {
     }
     
     // @netbot findport (FQDN | IP)
-    else if (args[0])
+    else if (args[0]) {
         try {
             const response = await fetch(BACKEND_API_URL + "findport/" + args[0]);
             const json = await response.json();

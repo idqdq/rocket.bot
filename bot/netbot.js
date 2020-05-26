@@ -5,10 +5,10 @@ const rmap = require('./funcs');
 // customize the following with your server and BOT account information
 const HOST = process.env.ROCKET_HOST || 'http://rocket.vbrr.ru';
 const USER = process.env.ROCKET_USER || 'netbot';
-const PASS = process.env.ROCKET_PASS || 'mypasswrd!';
+const PASS = process.env.ROCKET_PASS || 'qA4FPhDiSFmyG9dNo';
 const BOTNAME = process.env.ROCKET_BOTNAME || 'netbot';  // name the bot response to
 const SSL = true;  // server uses https ?
-const ROOMS = ['sandbox'];
+const ROOMS = ['netbot'];
 
 var myuserid;
 // this simple bot does not handle errors, different message types, server resets 

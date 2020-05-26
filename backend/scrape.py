@@ -140,6 +140,25 @@ In [16]: my_device = {
     ...:     "ssh_config_file": True,
     ...:     "timeout_transport": 20,
     ...:     }
+
+In [17]: with JunosDriver(**my_device) as driver:
+    ...:     res = driver.send_command("sh ethernet-switching table vlan 21 | match 00:08:5d:51:c0:5e")
+    
+In [19]: from scrapli.helper import textfsm_parse
+
+In [20]: res.result
+Out[20]: '  COMMON            00:08:5d:51:c0:5e Learn          0 ge-0/0/11.0\n\n{master:0}'
+
+In [21]: structured = textfsm_parse("textfsm/juniper_show_ethernet-switching_table.textfsm", res.result)
+
+In [22]: structured
+Out[22]: 
+[{'age': '0',
+  'interface': 'ge-0/0/11.0',
+  'mac': '00:08:5d:51:c0:5e',
+  'type': 'Learn',
+  'vlan': 'COMMON'}]
+
 """
 
 
