@@ -1,26 +1,36 @@
 # NetOp Bot for rocket.chat
 
-the bot is intended to help in a system network operations.  
-the very first function that has been released is **acl**.  
+The bot is intended to help in a system network operations.  
+The very first function that has been released is **acl**.  
 **acl** checks if a given ip packet can pass throuth  the network with network policies being applied. 
+Also it can check for inactive rules inside a given ACL.  
 
 That is how it looks in an action:  
-![img1](docs/rocket.bot.check.acl.png)
+![acl_big](docs/netbotacl_big.png)
 
-the more detailed view:  
-![img2](docs/rocket.bot.check.acl.fragment.png)
+the same picture with more detailed view:  
+![acl](docs/netbotacl.png)
 
-**acl** uses the **batfish** under the hood.
+**acl** uses the [**batfish**](https://www.batfish.org/) under the hood.
+
+Later the second function **port** was added.  
+The **port** function. It finds a network switch and a port a hostname, ip or mac is connected to.
+
+And this is how the port function looks in an action:
+![port](docs/netbotport.png)
 
 ----
 
 ## deployment
 
-The application consists of two pices: the Bot and the backend.
+The application consists of two pices: the Bot and the Backend.
 
-the Bot interacts with rocket.chat instance while the backend interacts with the batfish.
+the Bot interacts with rocket.chat instance and sends requests to the Backend via GET/POST http requests.
+the Backend do all the job: walking throuth the networks or interacts with the batfish.
 
-And finally the Bot sends requests to backend via GET/POST http requests.
+Thus all the functions the Backend is capable of could be used not only from the Rocket.chat but from any other application.  
+
+Application architecure:
 
 ![img3](docs/rocket.bot.architecture.png)
 
@@ -43,7 +53,18 @@ node netbot.js
 
 ### 2. Deploing Backend
 
-Backend is a python application that uses the FastAPI framework and the pybatfish library. 
+Backend is a python application that uses the FastAPI framework.  
+FastAPI is a pip package and it could be easily installed with the following commands:
+
+```
+pip3 install fastapi
+pip3 install uvicorn
+```
+
+Every backend's function comes with their uniq requires. 
+
+### 2.1 ACL
+**acl** function uses the pybatfish library. 
 Note: pybatfish comes with pandas (Data analysisi library) version 0.26.x, but the application uses the function .to_markdown() that appeared since version 1.0.0. So packages must be installed in order: first install pybatfish, next - pandas.
 
 ```
@@ -53,11 +74,7 @@ cd backend
 pip3 install pybatfish
 pip3 install --upgrade pandas
 ```
-and install fastAPI as well:
-```
-pip3 install fastapi
-pip3 install uvicorn
-```
+
 now run batfish in a docker container:
 ```
 docker run --name batfish -v batfish-data:/data -p 8888:8888 -p 9997:9997 -p 9996:9996 batfish/allinone
@@ -90,6 +107,105 @@ Actually you don't have to init snapshot manually every time the network configs
 There is the special command to do that from within the application. 
 **@botname acl help** - command will help you to reveal it
 
+### 2.2 PORT
+
+The **port** function code uses a set of different libraries. Note that while it is in a development/experimental state the requirements may change from time to time. 
+
+To install the needed packages issue the command:
+```
+pip3 install -r requirements.txt
+```
+
+Now we need to prepare **inventory** that describes the networks we would like to use it on.  
+There three inventory files that have to be created (edited):  
+- site_network.yml  
+The **port** function supports multisites.  
+To define the site it uses file: *inventory/site_network.yml*
+```yaml
+---
+sites:
+  - name: moscow
+    networks:
+      - 10.1.0.0/17
+      - 10.2.0.0/16
+    core: n7k1
+    siteID: 1
+
+  - name: samara
+    networks:
+      - 10.1.160.0/19
+      - 10.1.220.0/24
+    core: samara-core
+    siteID: 2
+```
+The networks here are aggregated supernets that you are using or are going to use in the future.  
+Based on ip address or siteID (in case of mac) requested the aplication finds the core switch name it would start walking from.
+
+- hosts.yml  
+The **port** function is a recursive walker that first finds out the mac address from the arp table on a core switch and then walks from the top (core) to bottom of a network tree looking for an endport with that mac. this tree has to be described in the file: *inventory/hosts.yml*
+```yml
+---
+n7k1:
+  hostname: n7k1
+  groups:
+    - moscow
+    - core
+    - nexus
+  data:
+    role: core    
+    children: 
+      Po14: catalyst10
+      Po12: catalyst20
+      
+catalyst10:
+  hostname: catalyst10  
+  groups:
+    - moscow
+    - ios        
+  data:
+    role: access    
+    children: 
+      Gi2/0/1: catalyst101
+      Gi3/0/6: catalyst102
+      
+catalyst101:
+  hostname: catalyst101  
+  groups:
+    - moscow
+    - ios    
+  data:
+    role: access
+```
+The logic here is pretty straightforward. First the application is looking for a port the mac is located behind. If that port exists in the children section of a current switch it takes the next switch name (from the *port:switch* keypair) and starts walking over it. If there is no children then the function returns the last port name.  
+Note: only hostname and group that defines a platform (ios,nxos,junos,...) is mandatory fields.
+
+- groups.yml
+```yml
+---
+groups:
+  nexus:
+    platform: nxos
+    username: cisco
+    password: cisco
+  ios:
+    platform: ios
+    username: backup
+    password: backup
+  huawei:
+    platform: huawei_vrp
+    username: admin
+    password: admin
+  junos:
+    platform: junos
+    username: rancid
+    auth_private_key: ~/rocket/rancid_rsa    
+```
+If you know [Nornir](https://nornir.readthedocs.io) both the *hosts.yml* and *groups.yml* would looks familiar. This is because I planed to use **Nornir** at the beginning. And the logic here is the same. Except I do not use complex objects. Only plain python's dictionary. First I fill up **hosts** dictionary from the *hosts.yml* and then enrich every host in the hosts with the group information.   
+
+Thats all for now. If you have already started the application in the previous (ACL) section then it should already work.  
+just type 
+> @netbot port help
+and go forward
 
 ## Docker
 
