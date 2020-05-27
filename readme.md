@@ -118,10 +118,12 @@ pip3 install -r requirements.txt
 
 Now we need to prepare **inventory** that describes the networks we would like to use it on.  
 There three inventory files that have to be created (edited):  
-- site_network.yml  
+#### site_network.yml  
+
 The **port** function supports multisites.  
 To define the site it uses file: *inventory/site_network.yml*
-```yaml
+
+```yml
 ---
 sites:
   - name: moscow
@@ -141,8 +143,10 @@ sites:
 The networks here are aggregated supernets that you are using or are going to use in the future.  
 Based on ip address or siteID (in case of mac) requested the aplication finds the core switch name it would start walking from.
 
-- hosts.yml  
+#### hosts.yml  
+
 The **port** function is a recursive walker that first finds out the mac address from the arp table on a core switch and then walks from the top (core) to bottom of a network tree looking for an endport with that mac. this tree has to be described in the file: *inventory/hosts.yml*
+
 ```yml
 ---
 n7k1:
@@ -179,7 +183,8 @@ catalyst101:
 The logic here is pretty straightforward. First the application is looking for a port the mac is located behind. If that port exists in the children section of a current switch it takes the next switch name (from the *port:switch* keypair) and starts walking over it. If there is no children then the function returns the last port name.  
 Note: only hostname and group that defines a platform (ios,nxos,junos,...) is mandatory fields.
 
-- groups.yml
+#### groups.yml
+
 ```yml
 ---
 groups:
@@ -204,8 +209,10 @@ If you know [Nornir](https://nornir.readthedocs.io) both the *hosts.yml* and *gr
 
 Thats all for now. If you have already started the application in the previous (ACL) section then it should already work.  
 just type 
-> @netbot port help
-and go forward
+```
+@netbot port help  
+```
+and go forward...
 
 ## Docker
 
