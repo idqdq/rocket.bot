@@ -13,8 +13,8 @@ the same picture with more detailed view:
 
 **acl** uses the [**batfish**](https://www.batfish.org/) under the hood.
 
-Later the second function **port** was added.  
-The **port** function. It finds a network switch and a port a hostname, ip or mac is connected to.
+Later the second function was added. The **port** function.  
+It finds a network switch and a port a hostname, ip or mac is connected to.
 
 And this is how the port function looks in an action:
 ![port](docs/netbotport.png)
