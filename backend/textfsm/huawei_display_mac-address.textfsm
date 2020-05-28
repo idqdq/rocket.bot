@@ -1,0 +1,6 @@
+Value MAC (([0-9A-Fa-f]){4}-([0-9A-Fa-f]){4}-([0-9A-Fa-f]){4})
+Value VLAN (\d+)
+Value IF (\w\S+)
+
+Start
+  ^${MAC}\s+${VLAN}/-\s+${IF} -> Record

@@ -8,6 +8,7 @@ const rmap = {
     "meme": meme,
     "zabbix": zabgraf,
     "acl": check_acl,
+    "port":findport,
     "md": check_md,
 };
 // help method that returns a set of keys
@@ -31,7 +32,7 @@ const BACKEND_API_URL = process.env.BACKEND_API_URL || "http://127.0.0.1:8000/ap
 
 async function check_acl(args) {
 
-    //@easybot help
+    //@netbot acl help
     if (args[0] && args[0].toUpperCase() == "HELP") {
         return `## acl help
 ***acl help*** - prints this;  
@@ -51,7 +52,7 @@ command format: *src_addr dst_addr [ dst_port | dst_port (tcp|udp)]*
         `
     }
 
-    //@easybot init
+    //@netbot init
     else if (args[0] && args[0].toUpperCase() == "INIT") {
         try {
             const response = await fetch(BACKEND_API_URL + 'initbf');
@@ -63,7 +64,7 @@ command format: *src_addr dst_addr [ dst_port | dst_port (tcp|udp)]*
         }
     }
 
-    //@easybot acl unreachable VL20_OUT n7k1 5 - prints 5 lines of unreachable ace's of the given acl
+    //@netbot acl unreachable VL20_OUT n7k1 5 - prints 5 lines of unreachable ace's of the given acl
     else if (args[0] && args[0].toUpperCase() == "UNREACHABLE") {
      
         if (3 > args.length || args.length > 4 || (args[3] && isNaN(args[3]))) {
@@ -91,7 +92,7 @@ command format: *src_addr dst_addr [ dst_port | dst_port (tcp|udp)]*
         }
     }
 
-    //@easybot acl 10.2.3.4 10.1.2.0/24 - find and print a filter that permits or blocks the packet with the given parameters
+    //@netbot acl 10.2.3.4 10.1.2.0/24 - find and print a filter that permits or blocks the packet with the given parameters
     else {
         const IpAddrPattern = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)($|\/(3[0-2]|[1-2][0-9]|[0-9])$)/;
         const jkeys = ["srcIps", "dstIps", "dstPorts", "ipProtocols"];
@@ -143,8 +144,58 @@ command format: *src_addr dst_addr [ dst_port | dst_port (tcp|udp)]*
     }
 }
 
-// ******************** end batfish section *******************//
 
+async function findport(args) {
+
+    // @netbot findport help
+    if (args[0] && args[0].toUpperCase() == "HELP") {
+        return `## port help
+***port help*** - prints this;  
+***port hostname*** - finds the switch and the access port the device with name *hostname* is connected to  
+***port ip_address*** - finds the switch and the access port the device with ip address *ip_address* is connected to  
+***port mac mac_address site_id*** - finds the switch and the access port the device with mac address *mac_address* is connected to.  
+*port phone 1234* - finds the switch and the access port the phone device with the hpne number 1234 is connected to (to be impemented)  
+*example*:  
+> @botname port 10.2.1.96  
+> @botname port mac 00:11:22:33:44:55 0`
+    }
+    
+    // @netbot findport mac MAC site_id | site_id is optional. default is 0
+    else if (args[0] && args[0].toUpperCase() == "MAC" && args[1]){ 
+        const jObj = {};
+        jObj['mac'] = args[1];
+        jObj['site'] = args[2] || 0;
+
+        try {
+            const response = await fetch(BACKEND_API_URL + "findportbymac/",
+            {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(jObj)
+            });            
+            const json = await response.json();
+            return json;
+        }
+        catch (err) {
+            return err;
+        }
+    }
+    
+    // @netbot findport (FQDN | IP)
+    else if (args[0]) {
+        try {
+            const response = await fetch(BACKEND_API_URL + "findport/" + args[0]);
+            const json = await response.json();
+            return json;
+        }
+        catch (err) {
+            return err;
+        }
+    }
+
+}
+// ******************** end batfish section *******************//
+// **************** vsyakaya fignya *****************///
 
 function meme() {
     return {
@@ -181,5 +232,4 @@ function check_md() {
 }
 
 
-//module.exports = respmap;
 module.exports = rmap;

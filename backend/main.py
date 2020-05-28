@@ -1,8 +1,10 @@
 import uvicorn
 from fastapi import FastAPI
 from pydantic import BaseModel
+from ipaddress import ip_address
 from os import environ
 from batfish import LibBatfish
+from findport import FindPortByAddress, FindPortByMac
 
 BF_HOSTNAME = environ.get("BF_HOSTNAME") if environ.get("BF_HOSTNAME") else "localhost"
 NETWORK_NAME = environ.get("BF_NETWORK_NAME") if environ.get("BF_NETWORK_NAME") else "bf1" 
@@ -29,6 +31,7 @@ def InitBatfish():
     except:
         return False
 
+
 @app.post("/api/check_acl")
 def check_acl(data: aclData):       
     if InitBatfish():
@@ -39,7 +42,8 @@ def check_acl(data: aclData):
     
     return ":x: **batfish:** can't init snapshot"
 
-# @easybot acl unreachable VL20_OUT n7k1 5 - prints 5 lines of unreachable ace's of the given acl
+
+# @netbot acl unreachable VL20_OUT n7k1 5 - prints 5 lines of unreachable ace's of the given acl
 @app.post("/api/check_unreachable_ace")  
 def check_unreachable_ace(data: aceData):    
     if InitBatfish():
@@ -50,7 +54,8 @@ def check_unreachable_ace(data: aceData):
     
     return ":x: **batfish:** can't init snapshot"
 
-# @easybot init - init a batfish snapshot (needed if running first time or if config files were changed)
+
+# @netbot init - init a batfish snapshot (needed if running first time or if config files were changed)
 @app.get("/api/initbf")
 def init_bf_snapshot():
     try:
@@ -59,9 +64,33 @@ def init_bf_snapshot():
     except:
         return ":x: **batfish** can't init snapshot"
 
+
+# @netbot findport ( name | IP ) - shows the port the requested device is connected to 
+@app.get("/api/findport/{address}")
+def findport(address: str):
+    try:
+        return FindPortByAddress(address)    
+    except:
+        return ":x: internal error!"
+    
+
+# @netbot findport mac macaddress site_id - find the port (by mac) the requested device is connected to 
+class macData(BaseModel):
+    mac: str
+    site: int = 1
+
+@app.post("/api/findportbymac")
+def findportbymac(data: macData):
+    try:
+        return FindPortByMac(data.mac, data.site)
+    except:
+        return ":x: internal error!"
+
+
 @app.get("/")
 async def root():
     return {"message": "batfish backend"}
+
 
 @app.get("/about")
 async def about():
