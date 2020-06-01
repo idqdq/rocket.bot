@@ -1,164 +1,140 @@
-# notes #####################################################################################################
-#### NAPALM #################################################################################################
-import napalm, textfsm
-
-def get_port_by_mac_huawei(host, mac, vlan=None):
-    driver = napalm.get_network_driver(host['platform'])
-    #with driver(host, user, pasw, optional_args={'ssh_config_file': '~/.ssh/ssh_config'}) as device:
-    with driver(host['hostname'], host['username'], host['password']) as device:
-        device.open()
-        cli_cmd = f'display mac-address {mac} vlan {vlan}' if vlan else f'display mac-address {mac}'
-        res = device.cli([cli_cmd])
-                
-        if res:
-            output = res[cli_cmd]
-            with open("textfsm/huawei_display_mac-address.textfsm") as t:
-                fsm = textfsm.TextFSM(t)
-                result = fsm.ParseText(output)
-
-                res = dict(zip(fsm.header, result[0]))
-                return {'port': res['IF'], 'vlan': res['VLAN']}
-
-# huawei uses napalm-huawei-vrp driver
-# it has to be installed manually by pip3 install napam-huawei-vrp
-#In [6]: get_port_by_mac_huawei(shab4a, mac, 160)
-#res = {'MAC': '1c66-6d93-211b', 'VLAN': '160', 'IF': 'GE0/0/24'}
-
-
-###############################################################################################################
-# SCRAPLI #####################################################################################################
-#ios: sh mac address-table address 0001.6cd5.ad67 vlan 21
-#res = [{'destination_address': '0001.6cd5.ad67', 'type': 'STATIC', 'vlan': '21', 'destination_port': 'Gi1/0/17'}]
-#nxos: sh mac address-table vlan 21 address 4c:cc:6a:55:f1:b5
-#res = [{'vlan': '21', 'mac': '4ccc.6a55.f1b5', 'type': 'dynamic', 'age': '~~~', 'secure': 'F', 'ntfy': 'F', 'ports': 'Po31'}]
-
+# this module provides functions that connect to network switches and request arp and mac tables.
+# It's using the scrapli library under the hood
 from scrapli.driver.core import IOSXEDriver, NXOSDriver, JunosDriver
+from scrapli.helper import textfsm_parse
 
-def get_port_by_mac(host, mac, vlan=None):
-
-    if host['platform'] not in ('ios', 'nxos'):
-        return get_port_by_mac_huawei(host, mac, vlan)
-    
-    platform_map = {
-      'ios': {
-        'driver': IOSXEDriver,
-        'cmd': f'sh mac address-table address {mac} vlan {vlan}' if vlan else f'sh mac address-table address {mac}',
-        'port': 'destination_port'
-      },
-      'nxos': {
-        'driver': NXOSDriver,
-        'cmd': f'sh mac address-table vlan {vlan} address {mac}' if vlan else f'sh mac address-table address {mac}',
-        'port': 'ports'
-      }
-    }
-
-    platform = platform_map[host['platform']]
-    res = QuerySwitch(host, platform)
-    if res:
-        return { 'port': res[0][platform['port']], 'vlan': res[0]['vlan'] }
-    else:
-        return None
-
-
-def get_mac_by_ip(host, ip):
-    platform_map = {
-      'ios': {
-        'driver': IOSXEDriver,
-        'cmd': f'sh ip arp {ip}',
-        'mac': 'mac',
-        'interface': 'interface'
-      },
-      'nxos': {
-        'driver': NXOSDriver,
-        'cmd': f'sh ip arp {ip}',        
-        'mac': 'mac',
-        'interface': 'interface'
-      }
-    }
-
-    platform = platform_map[host['platform']]
-    res = QuerySwitch(host, platform)
-    
-    if res:
-        mac = res[0][platform['mac']]
-        ifName = res[0][platform['interface']]
-        vlan = int(''.join(x for x in ifName if x.isdigit())) # transform Vlan221 to 221
-        return { 'mac': mac, 'vlan': vlan }
-    else:
-        return None
-
-
-def QuerySwitch(host, platform):
+def PrepareConnObject(host):
+# platform independent data
     my_device = { 
-        "host": host['hostname'],
-        "auth_username": host['username'],
-        "auth_password": host['password'],
-        "auth_strict_key": False,
-        "ssh_config_file": True,
+        'host': host['hostname'],
+        'auth_username': host['username'],
+        'auth_password': host.get('password', "")
     }   
+
+    ssh_map = { 
+        'auth_strict_key': False, 
+        'ssh_config_file': True, 
+        'auth_private_key': host.get('auth_private_key', ""), 
+    }
     
+    telnet_map = { 
+        'transport': 'telnet', 
+        'port': 23 
+    }
+
+    if host['data'].get('transport') == 'telnet': 
+        my_device = { **my_device, **telnet_map }
+        return my_device
+    
+    my_device = { **my_device, **ssh_map }
+
+    if host['platform'] == 'huawei':
+    # custom driver's options for huawei gears
+        from scrapli.driver.network_driver import PrivilegeLevel
+        PRIVS = {    
+        'privilege_exec': (
+            PrivilegeLevel(r'^(\\n)?<.+>$', 'privilege_exec', '', '', '', False, '', )),
+        'configuration': (
+            PrivilegeLevel(r'^(\\n)?\[.+\]>$', 'configuration', 'privilege_exec', 'quit', 'system-view', False, '', )),
+        }
+
+        def huawei_disable_paging(conn):
+            conn.channel.send_input(channel_input='screen-length 0 temporary')
+
+        huawei_opts = {        
+            'privilege_levels': PRIVS,
+            'on_open': huawei_disable_paging,
+            'transport': 'paramiko',
+        }
+        my_device = { **my_device, **huawei_opts }
+
+    return my_device
+
+
+def QuerySwitch(my_device, platform, custom_textfsm=None):    
+
     conn = platform['driver'](**my_device)    
    
     conn.open()
     response = conn.send_command(platform['cmd'])
     
+    if custom_textfsm:
+        return textfsm_parse(custom_textfsm, response.result)
     return response.textfsm_parse_output()
 
 
-def get_port_by_mac_junos(host, mac, vlan=None):
-
-    if host['platform'] not in ('ios', 'nxos'):
-        return get_port_by_mac_huawei(host, mac, vlan)
-    
+def get_port_by_mac(host, mac, vlan=None):
     platform_map = {
-      'ios': {
-        'driver': IOSXEDriver,
-        'cmd': f'sh mac address-table address {mac} vlan {vlan}' if vlan else f'sh mac address-table address {mac}',
-        'port': 'destination_port'
-      },
-      'nxos': {
-        'driver': NXOSDriver,
-        'cmd': f'sh mac address-table vlan {vlan} address {mac}' if vlan else f'sh mac address-table address {mac}',
-        'port': 'ports'
-      }
+        'ios': {
+            'driver': IOSXEDriver,
+            'cmd': f'sh mac address-table address {mac} vlan {vlan}' if vlan else f'sh mac address-table address {mac}',
+        },
+        'nxos': {
+            'driver': NXOSDriver,
+            'cmd': f'sh mac address-table vlan {vlan} address {mac}' if vlan else f'sh mac address-table address {mac}',
+        },
+        'junos': {
+            'driver': JunosDriver,
+            'cmd': f'sh ethernet-switching table vlan {vlan} | match {mac}',
+        },
+        'huawei': {
+            'driver': IOSXEDriver,
+            'cmd': f'display mac-address {mac} vlan {vlan}' if vlan else f'display mac-address {mac}'
+        }
     }
 
-    platform = platform_map[host['platform']]
-    res = QuerySwitch(host, platform)
+    my_device = PrepareConnObject(host)
+
+    platform = host['platform']
+    if platform == 'junos':
+        custom_textfsm = 'textfsm/juniper_show_ethernet-switching_table.textfsm'
+    elif platform == 'huawei':
+        custom_textfsm = 'textfsm/huawei_display_mac-address.textfsm'
+    else:
+        custom_textfsm = None
+
+    res = QuerySwitch(my_device, platform_map[platform], custom_textfsm)
+
     if res:
-        return { 'port': res[0][platform['port']], 'vlan': res[0]['vlan'] }
+        port_map = {
+            'ios': 'destination_port',
+            'nxos': 'ports',
+            'junos': 'interface',
+            'huawei': 'if'
+        }
+        
+        # Juniper has no VLAN id info in the output. returning one from the input
+        if platform == 'junos':
+            return {'port': res[0][port_map[platform]], 'vlan': vlan}
+        else:
+            return {'port': res[0][port_map[platform]], 'vlan': res[0]['vlan']}
+
     else:
         return None
 
-"""
-Juniper ssh by privkey
-In [16]: my_device = {
-    ...:     'host': 'ex2200-205',
-    ...:     'auth_username': 'rancid',
-    ...:     "auth_private_key": "~/rocket/rancid_rsa",
-    ...:     "auth_strict_key": False,
-    ...:     "ssh_config_file": True,
-    ...:     "timeout_transport": 20,
-    ...:     }
 
-In [17]: with JunosDriver(**my_device) as driver:
-    ...:     res = driver.send_command("sh ethernet-switching table vlan 21 | match 00:08:5d:51:c0:5e")
+def get_mac_by_ip(host, ip):
+# supports ios and nxos platforms only
+    platform_map = {
+      'ios': {
+        'driver': IOSXEDriver,
+        'cmd': f'sh ip arp {ip}',       
+      },
+      'nxos': {
+        'driver': NXOSDriver,
+        'cmd': f'sh ip arp {ip}',        
+      }
+    }
+
+    my_device = PrepareConnObject(host)
+
+    platform = host['platform']
+    res = QuerySwitch(my_device, platform_map[platform])
     
-In [19]: from scrapli.helper import textfsm_parse
-
-In [20]: res.result
-Out[20]: '  COMMON            00:08:5d:51:c0:5e Learn          0 ge-0/0/11.0\n\n{master:0}'
-
-In [21]: structured = textfsm_parse("textfsm/juniper_show_ethernet-switching_table.textfsm", res.result)
-
-In [22]: structured
-Out[22]: 
-[{'age': '0',
-  'interface': 'ge-0/0/11.0',
-  'mac': '00:08:5d:51:c0:5e',
-  'type': 'Learn',
-  'vlan': 'COMMON'}]
-
-"""
-
-
+    if res:
+        mac = res[0]['mac']
+        ifName = res[0]['interface']
+        vlan = int(''.join(x for x in ifName if x.isdigit())) # transform Vlan221 to 221
+        return { 'mac': mac, 'vlan': vlan }
+    else:
+        return None
