@@ -1,0 +1,28 @@
+---
+groups:
+  nexus:
+    platform: nxos
+    username: admin
+    password: 
+  ios:
+    platform: ios
+    username: admin
+    password: 
+  huawei:
+    platform: huawei_vrp
+    username: admin
+    password: 
+  junos:
+    platform: junos
+    username: rancid
+    auth_private_key: ~/rocket/rancid_rsa
+    
+  core:
+    role: core
+  access:
+    role: access
+
+  su:
+    site: su
+  shab:
+    site: shab
