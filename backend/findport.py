@@ -63,7 +63,8 @@ def ConvertMac(mac, platform):
 
     map = { "ios": netaddr.mac_cisco,
             "nxos": netaddr.mac_cisco,
-            "huawei_vrp": mac_hua}
+            "junos": netaddr.mac_unix_expanded,
+            "huawei": mac_hua}
     mac = netaddr.EUI(mac)
     mac.dialect = map[platform]
     return mac
