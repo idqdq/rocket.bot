@@ -13,4 +13,45 @@ sites:
       - 10.1.220.0/24
     core: shab-core
     siteID: 2
-    
+
+  - name: spb
+    networks:
+      - 10.3.1.0/24
+      - 10.3.2.0/24
+    core: sw-spb
+    siteID: 10   
+
+  - name: samara1
+    networks:
+      - 10.3.44.0/23
+    core: sw-samara1
+    siteID: 20
+
+  - name: samara2
+    networks:
+      - 10.3.144.0/23
+    core: sw-samara2
+    siteID: 21
+
+  - name: nfu
+    networks:
+      - 10.3.16.0/20
+    core: sw-nfu
+    siteID: 30
+
+  - name: krasnodar
+    networks:
+      - 10.3.32.0/24
+      - 10.3.34.0/24
+    core: sw-krasn
+    siteID: 40
+
+  - name: novosibirsk
+    networks:
+      - 10.3.94.0/24
+      - 10.3.194.0/24
+    core: sw-novosibirsk
+    siteID: 50
+
+
+
