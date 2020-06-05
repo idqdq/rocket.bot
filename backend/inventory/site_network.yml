@@ -3,6 +3,7 @@ sites:
   - name: su
     networks:
       - 10.1.0.0/17
+      - 10.1.221.0/24
       - 10.2.0.0/16
     core: n7k1
     siteID: 1
