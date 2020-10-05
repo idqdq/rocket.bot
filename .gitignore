@@ -1,6 +1,7 @@
 node_modules/
 bot/package-lock.json
 **/configs/*
+backend/inventory/groups.yml
 
 .vscode/
 *.code-workspace
