@@ -2,16 +2,16 @@
 groups:
   nexus:
     platform: nxos
-    username: admin
-    password: $ecret1
+    username: cisco
+    password: cisco
   ios:
     platform: ios
-    username: admin
-    password: $ecret1
+    username: cisco
+    password: cisco
   huawei:
     platform: huawei
     username: ansible
-    password: Ra6oorai4dee
+    password: ansible
   junos:
     platform: junos
     username: rancid
@@ -19,7 +19,7 @@ groups:
   ios-nfu:
     platform: ios
     username: backup
-    password: cheeFee1
+    password: backup
     
   core:
     role: core
