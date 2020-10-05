@@ -1,6 +1,4 @@
-# sencitive
-backend/inventory/groups.yml
-
+groups.yml
 node_modules/
 bot/package-lock.json
 **/configs/*
