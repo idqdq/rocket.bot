@@ -4,7 +4,7 @@ from pydantic import BaseModel
 from ipaddress import ip_address
 from os import environ
 from batfish import LibBatfish
-from findport import FindPortByAddress, FindPortByMac
+from findport import FindPortByAddress, FindPortByMac, FindPortByPhoneNumber
 
 BF_HOSTNAME = environ.get("BF_HOSTNAME") if environ.get("BF_HOSTNAME") else "localhost"
 NETWORK_NAME = environ.get("BF_NETWORK_NAME") if environ.get("BF_NETWORK_NAME") else "bf1" 
@@ -65,7 +65,7 @@ def init_bf_snapshot():
         return ":x: **batfish** can't init snapshot"
 
 
-# @netbot findport ( name | IP ) - shows the port the requested device is connected to 
+# @netbot port ( name | IP ) - shows the port the requested device is connected to 
 @app.get("/api/findport/{address}")
 def findport(address: str):
     try:
@@ -73,6 +73,13 @@ def findport(address: str):
     except:
         return ":x: internal error!"
     
+# @netbot port phone ( number ) - shows the port the phone with the requested number is connected to 
+@app.get("/api/findportbyphone/{phone}")
+def findportbyphone(phone: str):
+    try:
+        return FindPortByPhoneNumber(phone)    
+    except:
+        return ":x: internal error!"
 
 # @netbot findport mac macaddress site_id - find the port (by mac) the requested device is connected to 
 class macData(BaseModel):

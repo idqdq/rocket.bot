@@ -94,6 +94,16 @@ def FindPortByAddress(address):
     
     return  FindPortRecursively(hosts, core, res['mac'], res['vlan'])
 
+#public func
+def FindPortByPhoneNumber(phonenumber):
+    import redis
+    r = redis.Redis()
+    try:
+        ip = json.loads(r.get(phonenumber).decode("utf-8"))['ip']
+        return FindPortByAddress(ip)
+    except:
+        return f":x: internal error occured or the phone number {phonenumber} doesn't exist"
+    
 
 #public func
 def FindPortByMac(mac, siteID):

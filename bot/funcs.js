@@ -154,13 +154,13 @@ async function findport(args) {
 ***port hostname*** - finds the switch and the access port the device with name *hostname* is connected to  
 ***port ip_address*** - finds the switch and the access port the device with ip address *ip_address* is connected to  
 ***port mac mac_address site_id*** - finds the switch and the access port the device with mac address *mac_address* is connected to.  
-*port phone 1234* - finds the switch and the access port the phone device with the hpne number 1234 is connected to (to be impemented)  
+*port phone 1234* - finds the switch and the access port the phone device with the phone number 1234 is connected to (to be impemented)  
 *example*:  
 > @botname port 10.2.1.96  
 > @botname port mac 00:11:22:33:44:55 0`
     }
     
-    // @netbot findport mac MAC site_id | site_id is optional. default is 0
+    // @netbot port mac MAC site_id | site_id is optional. default is 0
     else if (args[0] && args[0].toUpperCase() == "MAC" && args[1]){ 
         const jObj = {};
         jObj['mac'] = args[1];
@@ -181,7 +181,19 @@ async function findport(args) {
         }
     }
     
-    // @netbot findport (FQDN | IP)
+    // @netbot port phone 1234
+    else if (args[0] && args[0].toUpperCase() == "PHONE" && args[1]){ 
+        try {
+            const response = await fetch(BACKEND_API_URL + "findportbyphone/" + args[1]);
+            const json = await response.json();
+            return json;
+        }
+        catch (err) {
+            return err;
+        }
+    }
+
+    // @netbot port (FQDN | IP)
     else if (args[0]) {
         try {
             const response = await fetch(BACKEND_API_URL + "findport/" + args[0]);
