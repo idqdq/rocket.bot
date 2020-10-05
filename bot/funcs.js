@@ -154,10 +154,11 @@ async function findport(args) {
 ***port hostname*** - finds the switch and the access port the device with name *hostname* is connected to  
 ***port ip_address*** - finds the switch and the access port the device with ip address *ip_address* is connected to  
 ***port mac mac_address site_id*** - finds the switch and the access port the device with mac address *mac_address* is connected to.  
-*port phone 1234* - finds the switch and the access port the phone device with the phone number 1234 is connected to (to be impemented)  
+***port phone 1234*** - finds the switch and the access port the phone device with the number 1234 is connected to.  
 *example*:  
-> @botname port 10.2.1.96  
-> @botname port mac 00:11:22:33:44:55 0`
+> @botname port 10.2.1.96
+> @botname port mac 00:11:22:33:44:55 0
+> @botname port phone 1234`
     }
     
     // @netbot port mac MAC site_id | site_id is optional. default is 0
