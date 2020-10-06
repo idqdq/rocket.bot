@@ -1,4 +1,4 @@
-#/usr/bin/env python3
+#!/usr/bin/env python3
 # the script does ssh to the PBX (Mitel) run a command (extension_info) and parses output to a dictionary
 # then put that dictionary into a local Redis (@netbot port phone function to work)
 # and additionally transforms the dict to a csv file and sends that file by email
@@ -18,6 +18,7 @@
 # 1220       SIP      6.2-HF02BG18       Mitel SIP-DECT                      sip:1220@10.1.191.1;instance=urn:uuid:1F102ACA-0E00-0100-8000-030242debfa7
 # Warning: No matching group found, level is 0
 # 
+# script is executed weekly by cron (/etc/cron.weekly/mitel2redis)
 
 import os, socket, re
 from ssh2.session import Session
