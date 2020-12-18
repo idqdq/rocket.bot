@@ -89,7 +89,8 @@ from email.mime.text import MIMEText
 smtp_server = "algol.msk.vbrr.loc"
 sender_email = "nryzhkov@rigel.msk.vbrr.loc"
 receiver_email = "=?utf-8?B?0KDRi9C20LrQvtCyINCd0LjQutC+0LvQsNC5INCS0LjRgtCw0LvRjNC10LI=?= =?utf-8?B?0LjRhw==?= <Ryzhkov@vbrr.ru>,\
-    =?utf-8?B?0JrRg9Cx0LvQuCDQodC10YDQs9C10Lkg0JLQsNC70LXQvdGC0LjQvdC+0LI=?= =?utf-8?B?0LjRhw==?= <Kubli_SV@vbrr.ru>"
+    =?utf-8?B?0JrRg9Cx0LvQuCDQodC10YDQs9C10Lkg0JLQsNC70LXQvdGC0LjQvdC+0LI=?= =?utf-8?B?0LjRhw==?= <Kubli_SV@vbrr.ru>, \
+    =?utf-8?B?0J/RgNC+0YHRgtC40L0g0JvQtdC+0L3QuNC0INCS0LvQsNC00LjQvNC40YA=?= =?utf-8?B?0L7QstC40Yc=?= <Prostin_LV@vbrr.ru>"
 
 subject = "Mitel Phone extensions numbers with their IP and MACs"
 body = "CSV file attached"

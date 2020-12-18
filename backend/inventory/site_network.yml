@@ -19,6 +19,12 @@ sites:
     core: shab-core
     siteID: 2
 
+  - name: kad
+    networks:
+      - 10.3.104.0/24      
+    core: srx-kad
+    siteID: 3
+
   - name: spb
     networks:
       - 10.3.1.0/24

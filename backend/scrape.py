@@ -116,7 +116,6 @@ def get_port_by_mac(host, mac, vlan=None):
 
 
 def get_mac_by_ip(host, ip):
-# supports ios and nxos platforms only
     platform_map = {
         'ios': {
             'driver': IOSXEDriver,
@@ -129,6 +128,10 @@ def get_mac_by_ip(host, ip):
         'huawei': {
             'driver': IOSXEDriver,
             'cmd': f'display arp network {ip}'
+        },
+        'junos': {
+            'driver': JunosDriver,
+            'cmd': f'show arp hostname {ip} no-resove'
         }
     }
 
@@ -138,6 +141,8 @@ def get_mac_by_ip(host, ip):
 
     if platform == 'huawei':
         custom_textfsm = 'textfsm/huawei_display_arp_network.textfsm'
+    elif platform == 'junos':
+        custom_textfsm = 'textfsm/junos_show_arp_hostname.textfsm'
     else:
         custom_textfsm = None
 
