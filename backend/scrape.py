@@ -131,7 +131,7 @@ def get_mac_by_ip(host, ip):
         },
         'junos': {
             'driver': JunosDriver,
-            'cmd': f'show arp hostname {ip} no-resove'
+            'cmd': f'show arp hostname {ip} no-resolve'
         }
     }
 
