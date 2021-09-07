@@ -7,9 +7,10 @@ const rmap = {
     "func1": func1,
     "meme": meme,
     "zabbix": zabgraf,
+    "md": check_md,
     "acl": check_acl,
     "port":findport,
-    "md": check_md,
+    "ddos": ddos,
 };
 // help method that returns a set of keys
 rmap.help = function() {return Object.keys(rmap).join(', ');}
@@ -207,7 +208,33 @@ async function findport(args) {
     }
 
 }
-// ******************** end batfish section *******************//
+
+async function ddos(args) {
+    
+    // @netbot ddos help
+    if (args[0] && args[0].toUpperCase() == "HELP") {
+        return `## port help
+***ddos help*** - prints this;  
+***ddos token*** - cover or uncover a service under the Kasperski antiDDoS umbrella
+*example*:  
+> @botname ddos eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoic3RyaW5nIiwicHJpbV9JUCI6IjE5OC41MS4xMDAuNDIiLCJzdWJzdF9JUCI6IjE5OC41MS4xMDAuNDIiLCJUU0lHIjoic3RyaW5nIiwiZGRvcyI6dHJ1ZSwiZXhwIjoxNjMzNTI1MjE2fQ.3upwY-c79z-J3aiGw50seEMhqnjRD1U-F6pZQh55Nu4
+`
+    }
+    //
+    else if (args[0]){
+        const DDOS_BACKEND_API_URI = 'http://10.2.1.96:8000';
+        const API_PATH = '/api/ddosornotddosjwt?token='
+        try {
+            const response = await fetch(DDOS_BACKEND_API_URI + API_PATH + args[0]);                     
+            const json = await response.json();
+            return json;
+        }
+        catch (err) {
+            return err;
+        }
+    }
+}
+
 // **************** vsyakaya fignya *****************///
 
 function meme() {
