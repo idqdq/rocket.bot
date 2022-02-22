@@ -19,11 +19,19 @@ sites:
     core: shab-core
     siteID: 2
 
+  - name: arbat
+    networks:
+      - 10.1.112.0/20
+      - 10.1.128.0/20
+      - 192.168.97.0/24
+    core: arbat-core
+    siteID: 3
+
   - name: kad
     networks:
       - 10.3.104.0/24      
     core: srx-kad
-    siteID: 3
+    siteID: 4
 
   - name: spb
     networks:

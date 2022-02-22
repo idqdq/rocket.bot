@@ -155,6 +155,7 @@ async function findport(args) {
 ***port hostname*** - finds the switch and the access port the device with name *hostname* is connected to  
 ***port ip_address*** - finds the switch and the access port the device with ip address *ip_address* is connected to  
 ***port mac mac_address site_id*** - finds the switch and the access port the device with mac address *mac_address* is connected to.  
+> **site_id**: { 1 : such, 2 : shab, 3 : arbat, 10 : SPB, 20 : Samara }  
 ***port phone 1234*** - finds the switch and the access port the phone device with the number 1234 is connected to.  
 *example*:  
 > @botname port 10.2.1.96
