@@ -77,7 +77,7 @@ def get_port_by_mac(host, mac, vlan=None):
         },
         'junos': {
             'driver': JunosDriver,
-            'cmd': f'sh ethernet-switching table vlan {vlan} | match {mac}',
+            'cmd': f'sh ethernet-switching table vlan {vlan} | match {mac}' if host.get('data') and host['data'].get('junos_small') else f'sh ethernet-switching table vlan-id {vlan} | match {mac}',
         },
         'huawei': {
             'driver': IOSXEDriver,
@@ -89,7 +89,11 @@ def get_port_by_mac(host, mac, vlan=None):
 
     platform = host['platform']
     if platform == 'junos':
-        custom_textfsm = 'textfsm/juniper_show_ethernet-switching_table.textfsm'
+        if host.get('data') and host['data'].get('junos_small'):
+            custom_textfsm = 'textfsm/juniper_small_show_ethernet-switching_table.textfsm'
+        else:
+            custom_textfsm = 'textfsm/juniper_show_ethernet-switching_table.textfsm'
+
     elif platform == 'huawei':
         custom_textfsm = 'textfsm/huawei_display_mac-address.textfsm'
     else:
@@ -104,7 +108,7 @@ def get_port_by_mac(host, mac, vlan=None):
             'junos': 'interface',
             'huawei': 'if'
         }
-        
+        print(f'textfsm otput:\n{res}\n') 
         # Juniper has no VLAN id info in the output. returning one from the input
         if platform == 'junos':
             return {'port': res[0][port_map[platform]], 'vlan': vlan}

@@ -1,0 +1,8 @@
+Value VLAN (\w+)
+Value MAC ((([0-9A-Fa-f]){2}:){5}([0-9A-Fa-f]){2})
+Value Type (Learn|Static|Flood)
+Value Age ((\d+:)?\d+)
+Value Interface (.*$)
+
+Start 
+  ^\s*${VLAN}\s+${MAC}\s+${Type}\s+${Age}\s+${Interface} -> Record
