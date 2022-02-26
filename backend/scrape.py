@@ -66,6 +66,11 @@ def QuerySwitch(my_device, platform, custom_textfsm=None):
 
 
 def get_port_by_mac(host, mac, vlan=None):
+    if vlan:
+        cmd_junos = f'sh ethernet-switching table vlan {vlan} | match {mac}' if host.get('data') and host['data'].get('junos_small') else f'sh ethernet-switching table vlan-id {vlan} | match {mac}',
+    else:
+        cmd_junos = f'sh ethernet-switching table | match {mac}'
+
     platform_map = {
         'ios': {
             'driver': IOSXEDriver,
@@ -77,11 +82,11 @@ def get_port_by_mac(host, mac, vlan=None):
         },
         'junos': {
             'driver': JunosDriver,
-            'cmd': f'sh ethernet-switching table vlan {vlan} | match {mac}' if host.get('data') and host['data'].get('junos_small') else f'sh ethernet-switching table vlan-id {vlan} | match {mac}',
+            'cmd': cmd_junos,
         },
         'huawei': {
             'driver': IOSXEDriver,
-            'cmd': f'display mac-address {mac} vlan {vlan}' if vlan else f'display mac-address {mac}'
+            'cmd': f'display mac-address {mac} vlan {vlan}' if vlan else f'display mac-address {mac}',
         }
     }
 
