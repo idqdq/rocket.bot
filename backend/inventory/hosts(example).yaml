@@ -1,0 +1,128 @@
+---
+n7k1:
+  hostname: n7k1  
+  groups:
+    - site1
+    - core
+    - nexus
+  data:
+    role: core
+    parent:
+    children: 
+      Po1: catalyst1
+      Po2: catalyst2
+      Po3: catalyst3      
+
+
+catalyst1:
+  hostname: catalyst1
+  platform: ios
+  groups:
+    - site1
+    - ios        
+  data:
+    role: access    
+    children: 
+      Gi2/0/1: catalyst11            
+
+catalyst2:
+  hostname: catalyst2
+  platform: cisco_ios
+  groups:
+    - site1
+    - ios    
+  data:
+    role: access    
+    children: 
+      Gi1/0/6: catalyst21      
+
+catalyst3:
+  hostname: catalyst3
+  groups:
+    - site1
+    - ios    
+  data:
+    transport: telnet
+    role: access
+
+catalyst11:
+  hostname: catalyst11
+  groups:
+    - site1
+    - ios    
+  data:
+    role: access    
+    children:
+      Gi1/0/6: ex2200-101
+
+catalyst21:
+  hostname: catalyst21
+  groups:
+    - site1
+    - ios          
+
+# Juniper ex2200
+ex2200-101:
+  hostname: ex2200-101
+  groups:
+    - site1
+    - junos
+  data:
+    junos_small: yes
+
+
+### SITE2 ############
+core2:
+  hostname: core2
+  groups:
+    - site2
+    - core
+    - ios
+  data:
+    role: core
+    parent:
+    children:      
+      Po1: site2-1
+      Po2: site2-2      
+
+site2-1:
+  hostname: site2-1
+  groups:
+    - site2    
+    - huawei
+  data:
+    role: access    
+    children:
+
+site2-2:
+  hostname: site2-2
+  groups:
+    - site2    
+    - huawei
+  data:
+    role: access    
+    children:
+
+# SITE3
+core3:
+  hostname: core3
+  groups:
+    - site3
+    - core
+    - junos
+  data:        
+    children:      
+      ae0.0: site3-1
+      ae1.0: site3-2
+      
+site3-1:
+  hostname: site3-1
+  groups:
+    - site3
+    - huawei
+
+site3-2:
+  hostname: site3-2
+  groups:
+    - site3
+    - huawei
