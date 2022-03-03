@@ -57,7 +57,7 @@ def QuerySwitch(my_device, platform, custom_textfsm=None):
 
     conn = platform['driver'](**my_device)    
    
-    conn.open()
+    conn.open()    
     response = conn.send_command(platform['cmd'])
     
     if custom_textfsm:
@@ -67,7 +67,7 @@ def QuerySwitch(my_device, platform, custom_textfsm=None):
 
 def get_port_by_mac(host, mac, vlan=None):
     if vlan:
-        cmd_junos = f'sh ethernet-switching table vlan {vlan} | match {mac}' if host.get('data') and host['data'].get('junos_small') else f'sh ethernet-switching table vlan-id {vlan} | match {mac}',
+        cmd_junos = f'sh ethernet-switching table vlan {vlan} | match {mac}' if host.get('data') and host['data'].get('junos_small') else f'sh ethernet-switching table vlan-id {vlan} | match {mac}'
     else:
         cmd_junos = f'sh ethernet-switching table | match {mac}'
 
@@ -113,7 +113,7 @@ def get_port_by_mac(host, mac, vlan=None):
             'junos': 'interface',
             'huawei': 'if'
         }
-        print(f'textfsm otput:\n{res}\n') 
+        
         # Juniper has no VLAN id info in the output. returning one from the input
         if platform == 'junos':
             return {'port': res[0][port_map[platform]], 'vlan': vlan}

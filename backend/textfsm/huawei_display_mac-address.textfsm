@@ -3,4 +3,4 @@ Value VLAN (\d+)
 Value IF (\w\S+)
 
 Start
-  ^${MAC}\s+${VLAN}/-\s+${IF} -> Record
+  ^${MAC}\s+${VLAN}(\/-)+\s+${IF} -> Record
