@@ -1,6 +1,6 @@
 groups.yml
 hosts.yml
-site-network.yml
+site_network.yml
 
 node_modules/
 bot/package-lock.json
